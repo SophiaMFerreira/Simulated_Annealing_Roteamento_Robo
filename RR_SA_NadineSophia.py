@@ -5,7 +5,7 @@
 
 import random
 import matplotlib.pyplot as plt
-#import math
+import math
 
 #Ambiente
 random.seed(3)  #para gerar as mesmas instâncias a partir da mesma semente
@@ -39,6 +39,8 @@ pesoMovimentos = {
 
 random.seed();
 tamanhoLCR = 2;
+temperaturaInicial = 2162;
+temperaturaFinal = 25;
 
 def imprimeGrafico(melhorRota):
     x=[]
@@ -87,7 +89,7 @@ def calculaCusto(rota):
 
     return custo
 
-def encontraObjetivo(posicao, objetivo, refinamento):
+def encontraObjetivo(posicao, objetivo):
     coordenadaDestino = posicao[:];
     
     if(posicao[1] < objetivo[1]):
@@ -98,7 +100,7 @@ def encontraObjetivo(posicao, objetivo, refinamento):
             movX, movY = movimentos[3];
             coordenadaDestino[0] = movX + posicao[0];
             coordenadaDestino[1] = movY + posicao[1];
-    if((tuple(coordenadaDestino) in obstaculos) and refinamento):
+    if(tuple(coordenadaDestino) in obstaculos):
         objCoordenadaDestino = geraMovimentoAleatorio(posicao);
         posicao = objCoordenadaDestino[1][:];
     else:
@@ -116,7 +118,7 @@ def encontraObjetivo(posicao, objetivo, refinamento):
         movX, movY = movimentos[4];
         coordenadaDestino[0] = movX + posicao[0];
         coordenadaDestino[1] = movY + posicao[1];
-    if((tuple(coordenadaDestino) in obstaculos) and refinamento):
+    if(tuple(coordenadaDestino) in obstaculos):
         objCoordenadaDestino = geraMovimentoAleatorio(posicao);
         posicao = objCoordenadaDestino[1][:];
     else:
@@ -176,41 +178,77 @@ def removeCiclos(rota, inicioCorte, fimCorte):
         inicioCorte = 0;
         fimCorte = 0;
         return rota;
+
+def temperagem(energiaCorrente, energiaNova, temperaturaCorrente):
+    variacaoTemperatura = energiaNova - energiaCorrente;
+    aceitacao = False
+    if(variacaoTemperatura >= 0):
+        aceitacao = True;
+    else:
+        if (random.random() <= math.exp((variacaoTemperatura) / temperaturaCorrente )):
+            aceitacao = True;
+        else:
+            aceitacao = False;
+    temperaturaCorrente = temperaturaCorrente * 0.995;    
+    return temperaturaCorrente, aceitacao;
 #------------------------------------------------------------------------------------------------------------------------------------------
 
-posicao = inicio[:];
-rota = [];
-while(posicao != objetivo):
-    rota, posicao =  encontraObjetivo(posicao, objetivo, True);
-novaRota = rota[:];
-custo = calculaCusto(novaRota);#---------------------------------------------------Remover-------------------------------------------------
-print("Custo Inicial: ", custo);#---------------------------------------------------Remover------------------------------------------------
-i = 0;
-while(i < len(novaRota)):
-    novaRota = removeCiclos(novaRota, i, 0)
-    i += 1;
+temperaturaCorrente = temperaturaInicial;
+plator = 400;
 
-melhorRota = novaRota[:];
-custo = calculaCusto(novaRota);#---------------------------------------------------Remover-------------------------------------------------
-print("Custo sem ciclos: ", custo);#---------------------------------------------------Remover---------------------------------------------
+jMaximo = 10000;
+melhorCusto = 99999;
+melhorRota = [];
 
-for coordenada in novaRota:
-    if coordenada in obstaculos:
-        rotaAntesColisao = novaRota[:coordenada];
-        rotaAposColisao = novaRota[coordenada + 1:];
-        objCoordenadaDestino = geraMovimentoAleatorio(rotaAntesColisao[-1]);
-        posicao = objCoordenadaDestino[1][:];
-        rotaAntesColisao.append(posicao);
-        while(posicao != rotaAposColisao[0]):
-            rotaAntesColisao, posicao =  encontraObjetivo(posicao, rotaAposColisao[0], False);
-        novaRota = rotaAntesColisao[:] + rotaAposColisao[1:];
-i = 0;
-while(i < len(novaRota)):
-    novaRota = removeCiclos(novaRota, i, 0)
-    i += 1;
+for j in range(0, jMaximo):
+    posicao = inicio[:];
+    rota = [inicio[:]];    
+    iPlator  = 0;
+    
+    while(posicao != objetivo):
+        rota, posicao =  encontraObjetivo(posicao, objetivo);
+    i = 0;
+    while(i < len(rota)):
+        rota = removeCiclos(rota, i, 0)
+        i += 1;
+    custo = calculaCusto(rota);
+    
+    if(melhorCusto > custo):
+        melhorCusto = custo;
+        melhorRota = rota[:];
+        iPlator = 0;
+        print("Melhor Custo Parcial:", melhorCusto)
+    else:
+        iPlator += 1;
 
-imprimeGrafico(rota);
-imprimeGrafico(novaRota);
-custo = calculaCusto(novaRota);
-print("Ultimo custo: ", custo);
+    novaRota = rota[:];
+    explorar = True;
+    while(explorar and temperaturaCorrente > temperaturaFinal and iPlator == plator):
+        for coordenada in novaRota:
+            if coordenada in obstaculos:
+                rotaAntesColisao = novaRota[:coordenada];
+                rotaAposColisao = novaRota[coordenada + 1:];
+                objCoordenadaDestino = geraMovimentoAleatorio(rotaAntesColisao[-1]);
+                posicao = objCoordenadaDestino[1][:];
+                rotaAntesColisao.append(posicao);
+                while(posicao != rotaAposColisao[0]):
+                    rotaAntesColisao, posicao =  encontraObjetivo(posicao, rotaAposColisao[0], False);
+                novaRota = rotaAntesColisao[:] + rotaAposColisao[1:];
+        i = 0;
+        while(i < len(novaRota)):
+            novaRota = removeCiclos(novaRota, i, 0)
+            i += 1;
+        novoCusto = calculaCusto(novaRota);
+        
+        temperaturaCorrente, explorar = temperagem(custo, novoCusto, temperaturaCorrente);
+        if(melhorCusto > novoCusto):
+            melhorCusto = novoCusto;
+            melhorRota = novaRota[:];
+            iPlator = 0;
+            print("Melhor Custo Parcial:", melhorCusto)
+        else:
+            iPlator += 1;
 
+imprimeGrafico(melhorRota);
+print("\n========== Resultado SA ==========")
+print("Melhor custo Final: ", melhorCusto);
