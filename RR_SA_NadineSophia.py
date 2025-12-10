@@ -103,7 +103,6 @@ def encontraObjetivo(posicao, objetivo, refinamento):
         posicao = objCoordenadaDestino[1][:];
     else:
         posicao = coordenadaDestino[:];
-    
     rota.append(posicao);
     if(posicao == objetivo):
         return rota, posicao;
@@ -121,13 +120,11 @@ def encontraObjetivo(posicao, objetivo, refinamento):
         posicao = objCoordenadaDestino[1][:];
     else:
         posicao = coordenadaDestino[:];
-    
-    rota.append(posicao);
-    posicao = coordenadaDestino[:];
     rota.append(posicao);
     return rota, posicao;   
 
 def geraMovimentoAleatorio():
+    '''
     listaDestinos = [];
     coordenadaDestino = inicio[:];
     
@@ -156,13 +153,46 @@ def geraMovimentoAleatorio():
         else:
             pesos.append(pesoMovimentos[objDestino[0]]);
             
-    return random.choices(LCR, weights=pesos, k=1)[0];     
+    return random.choices(LCR, weights=pesos, k=1)[0]; '''
+
+    coordenadaDestino = inicio[:];
+    movimento = random.randint(1,2);
+    movX, movY = movimentos[movimento];
+    coordenadaDestino[0] = movX + posicao[0];
+    coordenadaDestino[1] = movY + posicao[1];
+    return [0, coordenadaDestino];    
+
 #------------------------------------------------------------------------------------------------------------------------------------------
 
 posicao = inicio[:];
 rota = [];
 while(posicao != objetivo):
     rota, posicao =  encontraObjetivo(posicao, objetivo, True);
+
+novaRota = rota[:];
+i = 0;
+while (i < (len(novaRota)-1)):
+    if novaRota[i] in novaRota[i+1:]:
+        posicao = novaRota.index(novaRota[i], i+1);
+        novaRota = novaRota[:i] + novaRota[posicao:];
+    else:
+        i+=1;
+melhorRota = novaRota[:];
+
+'''
+for coordenada in range(len(novaRota)):
+    if coordenada in obstaculos:
+        rotaAntesColisao = novaRota[:coordenada];
+        rotaAposColisao = novaRota[coordenada:];
+        objCoordenadaDestino = geraMovimentoAleatorio();
+        posicao = objCoordenadaDestino[1][:];
+        rotaAntesColisao.append(posicao);
+        rotaAntesColisao, posicao =  encontraObjetivo(posicao, rotaAposColisao[0], False);
+        novaRota = rotaAntesColisao[:] + rotaAposColisao[0:];
+'''
+
 custo = calculaCusto(rota);
 imprimeGrafico(rota);
 print("Melhor custo Final: ", custo);
+custo = calculaCusto(novaRota);
+print("Melhor custo : ", custo);
