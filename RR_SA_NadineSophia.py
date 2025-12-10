@@ -99,7 +99,7 @@ def encontraObjetivo(posicao, objetivo, refinamento):
             coordenadaDestino[0] = movX + posicao[0];
             coordenadaDestino[1] = movY + posicao[1];
     if((tuple(coordenadaDestino) in obstaculos) and refinamento):
-        objCoordenadaDestino = geraMovimentoAleatorio();
+        objCoordenadaDestino = geraMovimentoAleatorio(posicao);
         posicao = objCoordenadaDestino[1][:];
     else:
         posicao = coordenadaDestino[:];
@@ -116,14 +116,14 @@ def encontraObjetivo(posicao, objetivo, refinamento):
         coordenadaDestino[0] = movX + posicao[0];
         coordenadaDestino[1] = movY + posicao[1];
     if((tuple(coordenadaDestino) in obstaculos) and refinamento):
-        objCoordenadaDestino = geraMovimentoAleatorio();
+        objCoordenadaDestino = geraMovimentoAleatorio(posicao);
         posicao = objCoordenadaDestino[1][:];
     else:
         posicao = coordenadaDestino[:];
     rota.append(posicao);
     return rota, posicao;   
 
-def geraMovimentoAleatorio():
+def geraMovimentoAleatorio(posicao):
     '''
     listaDestinos = [];
     coordenadaDestino = inicio[:];
@@ -155,44 +155,62 @@ def geraMovimentoAleatorio():
             
     return random.choices(LCR, weights=pesos, k=1)[0]; '''
 
-    coordenadaDestino = inicio[:];
-    movimento = random.randint(1,2);
-    movX, movY = movimentos[movimento];
-    coordenadaDestino[0] = movX + posicao[0];
-    coordenadaDestino[1] = movY + posicao[1];
+    coordenadaDestino = [-1,-1];
+    while(coordenadaDestino[0] < 0  or coordenadaDestino[0] >= N or coordenadaDestino[1] < 0 or coordenadaDestino[1] >= N):
+        movimento = random.randint(1,3);
+        movX, movY = movimentos[movimento];
+        coordenadaDestino[0] = movX + posicao[0];
+        coordenadaDestino[1] = movY + posicao[1];
     return [0, coordenadaDestino];    
 
+def removeCiclos(rota, inicioCorte, fimCorte):
+    if(len(rota) < 2):
+        return rota;
+    
+    if(rota[inicioCorte] in rota[fimCorte:]):
+        return removeCiclos(rota, inicioCorte, fimCorte + 1);
+        
+    elif(inicioCorte != fimCorte):
+        rota = rota[:inicioCorte + 1] + rota[fimCorte:];
+        inicioCorte = 0;
+        fimCorte = 0;
+        return rota;
 #------------------------------------------------------------------------------------------------------------------------------------------
 
 posicao = inicio[:];
 rota = [];
 while(posicao != objetivo):
     rota, posicao =  encontraObjetivo(posicao, objetivo, True);
-
 novaRota = rota[:];
+custo = calculaCusto(novaRota);#---------------------------------------------------Remover-------------------------------------------------
+print("Custo Inicial: ", custo);#---------------------------------------------------Remover------------------------------------------------
 i = 0;
-while (i < (len(novaRota)-1)):
-    if novaRota[i] in novaRota[i+1:]:
-        posicao = novaRota.index(novaRota[i], i+1);
-        novaRota = novaRota[:i] + novaRota[posicao:];
-    else:
-        i+=1;
+while(i < len(novaRota)):
+    novaRota = removeCiclos(novaRota, i, 0)
+    i += 1;
+
 melhorRota = novaRota[:];
+custo = calculaCusto(novaRota);
+print("Custo sem ciclos: ", custo);
 
 '''
 for coordenada in range(len(novaRota)):
     if coordenada in obstaculos:
         rotaAntesColisao = novaRota[:coordenada];
         rotaAposColisao = novaRota[coordenada:];
-        objCoordenadaDestino = geraMovimentoAleatorio();
+        
+        objCoordenadaDestino = geraMovimentoAleatorio(novaRota[coordenada]);
         posicao = objCoordenadaDestino[1][:];
         rotaAntesColisao.append(posicao);
         rotaAntesColisao, posicao =  encontraObjetivo(posicao, rotaAposColisao[0], False);
-        novaRota = rotaAntesColisao[:] + rotaAposColisao[0:];
-'''
+        novaRota = rotaAntesColisao[:] + rotaAposColisao[1:];
+i = 0;
+while(i < len(novaRota)):
+    novaRota = removeCiclos(novaRota, i, 0)
+    i += 1;
 
-custo = calculaCusto(rota);
 imprimeGrafico(rota);
+imprimeGrafico(novaRota);
 print("Melhor custo Final: ", custo);
 custo = calculaCusto(novaRota);
-print("Melhor custo : ", custo);
+print("Melhor custo : ", custo);'''
