@@ -104,6 +104,7 @@ def encontraObjetivo(posicao, objetivo, refinamento):
     else:
         posicao = coordenadaDestino[:];
     rota.append(posicao);
+    
     if(posicao == objetivo):
         return rota, posicao;
     
@@ -157,7 +158,7 @@ def geraMovimentoAleatorio(posicao):
 
     coordenadaDestino = [-1,-1];
     while(coordenadaDestino[0] < 0  or coordenadaDestino[0] >= N or coordenadaDestino[1] < 0 or coordenadaDestino[1] >= N):
-        movimento = random.randint(1,3);
+        movimento = random.randint(1,4);
         movX, movY = movimentos[movimento];
         coordenadaDestino[0] = movX + posicao[0];
         coordenadaDestino[1] = movY + posicao[1];
@@ -190,19 +191,18 @@ while(i < len(novaRota)):
     i += 1;
 
 melhorRota = novaRota[:];
-custo = calculaCusto(novaRota);
-print("Custo sem ciclos: ", custo);
+custo = calculaCusto(novaRota);#---------------------------------------------------Remover-------------------------------------------------
+print("Custo sem ciclos: ", custo);#---------------------------------------------------Remover---------------------------------------------
 
-'''
-for coordenada in range(len(novaRota)):
+for coordenada in novaRota:
     if coordenada in obstaculos:
         rotaAntesColisao = novaRota[:coordenada];
-        rotaAposColisao = novaRota[coordenada:];
-        
-        objCoordenadaDestino = geraMovimentoAleatorio(novaRota[coordenada]);
+        rotaAposColisao = novaRota[coordenada + 1:];
+        objCoordenadaDestino = geraMovimentoAleatorio(rotaAntesColisao[-1]);
         posicao = objCoordenadaDestino[1][:];
         rotaAntesColisao.append(posicao);
-        rotaAntesColisao, posicao =  encontraObjetivo(posicao, rotaAposColisao[0], False);
+        while(posicao != rotaAposColisao[0]):
+            rotaAntesColisao, posicao =  encontraObjetivo(posicao, rotaAposColisao[0], False);
         novaRota = rotaAntesColisao[:] + rotaAposColisao[1:];
 i = 0;
 while(i < len(novaRota)):
@@ -211,6 +211,6 @@ while(i < len(novaRota)):
 
 imprimeGrafico(rota);
 imprimeGrafico(novaRota);
-print("Melhor custo Final: ", custo);
 custo = calculaCusto(novaRota);
-print("Melhor custo : ", custo);'''
+print("Ultimo custo: ", custo);
+
