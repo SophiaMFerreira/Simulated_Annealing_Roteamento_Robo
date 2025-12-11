@@ -128,17 +128,11 @@ def encontraObjetivo(posicao, objetivo):
 
 def geraMovimentoAleatorio(posicao):
     '''
-    listaDestinos = [];
-    coordenadaDestino = inicio[:];
-    
-    for movimento in movimentos:
-        listaDestinos.append([movimento, inicio[:], 0]);
-        
     for movimento in movimentos:
         movX, movY = movimentos[movimento];
         coordenadaDestino[0] = movX + posicao[0];
         coordenadaDestino[1] = movY + posicao[1];
-        listaDestinos[movimento-1][1] = coordenadaDestino[:];
+        listaDestinos[movimento-1][1] = coordenadaDestino[:]
         if tuple(coordenadaDestino) in obstaculos or tuple(coordenadaDestino) in rota:
             listaDestinos[movimento-1][2] = pesoMovimentos[movimento] * 50;
         elif coordenadaDestino[0] < 0  or coordenadaDestino[0] >= N or coordenadaDestino[1] < 0 or coordenadaDestino[1] >= N:
@@ -156,7 +150,8 @@ def geraMovimentoAleatorio(posicao):
         else:
             pesos.append(pesoMovimentos[objDestino[0]]);
             
-    return random.choices(LCR, weights=pesos, k=1)[0]; '''
+    return random.choices(LCR, weights=pesos, k=1)[0];
+    '''
 
     coordenadaDestino = [-1,-1];
     while(coordenadaDestino[0] < 0  or coordenadaDestino[0] >= N or coordenadaDestino[1] < 0 or coordenadaDestino[1] >= N):
@@ -179,7 +174,8 @@ def removeCiclos(rota, inicioCorte, fimCorte):
         fimCorte = 0;
         return rota;
 
-def temperagem(energiaCorrente, energiaNova, temperaturaCorrente):
+def temperagem(energiaCorrente, energiaNova, temperaturaCorrente, tempo):
+    cttResfriamento = 0.32
     variacaoTemperatura = energiaNova - energiaCorrente;
     aceitacao = False
     if(variacaoTemperatura >= 0):
@@ -189,14 +185,16 @@ def temperagem(energiaCorrente, energiaNova, temperaturaCorrente):
             aceitacao = True;
         else:
             aceitacao = False;
-    temperaturaCorrente = temperaturaCorrente * 0.995;    
+    #temperaturaCorrente = temperaturaCorrente * 0.995;
+    temperaturaCorrente = temperaturaFinal + ((temperaturaInicial - temperaturaFinal) * math.exp(-cttResfriamento * tempo));  
     return temperaturaCorrente, aceitacao;
+
 #------------------------------------------------------------------------------------------------------------------------------------------
 
 temperaturaCorrente = temperaturaInicial;
-plator = 400;
+plator = 10;
 
-jMaximo = 10000;
+jMaximo = 7000;
 melhorCusto = 99999;
 melhorRota = [];
 
@@ -221,9 +219,12 @@ for j in range(0, jMaximo):
     else:
         iPlator += 1;
 
-    novaRota = rota[:];
-    explorar = True;
-    while(explorar and temperaturaCorrente > temperaturaFinal and iPlator == plator):
+    explorar = False;
+    while(temperaturaCorrente > temperaturaFinal and iPlator < plator):
+        if(not explorar):
+            novaRota = rota[:];
+            iPlator = 0;
+            
         for coordenada in novaRota:
             if coordenada in obstaculos:
                 rotaAntesColisao = novaRota[:coordenada];
@@ -232,7 +233,7 @@ for j in range(0, jMaximo):
                 posicao = objCoordenadaDestino[1][:];
                 rotaAntesColisao.append(posicao);
                 while(posicao != rotaAposColisao[0]):
-                    rotaAntesColisao, posicao =  encontraObjetivo(posicao, rotaAposColisao[0], False);
+                    rotaAntesColisao, posicao =  encontraObjetivo(posicao, rotaAposColisao[0]);
                 novaRota = rotaAntesColisao[:] + rotaAposColisao[1:];
         i = 0;
         while(i < len(novaRota)):
@@ -240,7 +241,7 @@ for j in range(0, jMaximo):
             i += 1;
         novoCusto = calculaCusto(novaRota);
         
-        temperaturaCorrente, explorar = temperagem(custo, novoCusto, temperaturaCorrente);
+        temperaturaCorrente, explorar = temperagem(custo, novoCusto, temperaturaCorrente, j);
         if(melhorCusto > novoCusto):
             melhorCusto = novoCusto;
             melhorRota = novaRota[:];
