@@ -38,7 +38,6 @@ pesoMovimentos = {
 }
 
 random.seed();
-tamanhoLCR = 2;
 temperaturaInicial = 2162;
 temperaturaFinal = 25;
 
@@ -127,32 +126,6 @@ def encontraObjetivo(posicao, objetivo):
     return rota, posicao;   
 
 def geraMovimentoAleatorio(posicao):
-    '''
-    for movimento in movimentos:
-        movX, movY = movimentos[movimento];
-        coordenadaDestino[0] = movX + posicao[0];
-        coordenadaDestino[1] = movY + posicao[1];
-        listaDestinos[movimento-1][1] = coordenadaDestino[:]
-        if tuple(coordenadaDestino) in obstaculos or tuple(coordenadaDestino) in rota:
-            listaDestinos[movimento-1][2] = pesoMovimentos[movimento] * 50;
-        elif coordenadaDestino[0] < 0  or coordenadaDestino[0] >= N or coordenadaDestino[1] < 0 or coordenadaDestino[1] >= N:
-            listaDestinos[movimento-1][2] = pesoMovimentos[movimento] * 100;
-        else:
-            listaDestinos[movimento-1][2] = pesoMovimentos[movimento];
-    
-    LCR = sorted(listaDestinos, key=lambda objDestino: objDestino[2])[0:tamanhoLCR];
-    pesos = [];
-    for objDestino in LCR:
-        if tuple(objDestino[1]) in obstaculos:
-            pesos.append(pesoMovimentos[objDestino[0]] / 10);
-        elif objDestino[1][0] < 0  or objDestino[1][0] >= N or objDestino[1][1] < 0 or objDestino[1][1] >= N:
-            pesos.append(0);
-        else:
-            pesos.append(pesoMovimentos[objDestino[0]]);
-            
-    return random.choices(LCR, weights=pesos, k=1)[0];
-    '''
-
     coordenadaDestino = [-1,-1];
     while(coordenadaDestino[0] < 0  or coordenadaDestino[0] >= N or coordenadaDestino[1] < 0 or coordenadaDestino[1] >= N):
         movimento = random.randint(1,4);
@@ -191,10 +164,8 @@ def temperagem(energiaCorrente, energiaNova, temperaturaCorrente, tempo):
 
 #------------------------------------------------------------------------------------------------------------------------------------------
 
-temperaturaCorrente = temperaturaInicial;
-plator = 10;
-
-jMaximo = 7000;
+plator = 40;
+jMaximo = 6000;
 melhorCusto = 99999;
 melhorRota = [];
 
@@ -202,6 +173,7 @@ for j in range(0, jMaximo):
     posicao = inicio[:];
     rota = [inicio[:]];    
     iPlator  = 0;
+    temperaturaCorrente = temperaturaInicial;
     
     while(posicao != objetivo):
         rota, posicao =  encontraObjetivo(posicao, objetivo);
@@ -215,7 +187,7 @@ for j in range(0, jMaximo):
         melhorCusto = custo;
         melhorRota = rota[:];
         iPlator = 0;
-        print("Melhor Custo Parcial:", melhorCusto)
+        print("- Melhor custo parcial:", melhorCusto)
     else:
         iPlator += 1;
 
@@ -246,7 +218,7 @@ for j in range(0, jMaximo):
             melhorCusto = novoCusto;
             melhorRota = novaRota[:];
             iPlator = 0;
-            print("Melhor Custo Parcial:", melhorCusto)
+            print("- Melhor custo parcial:", melhorCusto)
         else:
             iPlator += 1;
 
