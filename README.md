@@ -209,9 +209,9 @@ def temperagem(energiaCorrente, energiaNova, temperaturaCorrente, tempo):
 * Se a variação for ≥ 0, aceita diretamente.
 * Caso contrário, aceita com probabilidade `exp(variacao / T)`.
 * Depois atualiza `T` com:
-  [
-  T = T_f + (T_i - T_f)\cdot e^{-k\cdot tempo}
-  ]
+
+   ![Fórmula de atualização da temperatura](https://latex.codecogs.com/png.latex?T%20=%20T_f%20+%20(T_i%20-%20T_f)\cdot%20e^{-k%20\cdot%20j})
+
   onde `tempo` é a iteração `j`.
 
 ---
