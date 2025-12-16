@@ -137,6 +137,7 @@ def encontraObjetivo(posicao, objetivo):
 ### 🚧 Tratamento de Obstáculos: `geraMovimentoAleatorio(posicao)`
 
 Quando o robô precisa desviar, esta função sorteia um movimento entre 4 direções até gerar um destino **dentro do tabuleiro**.
+
 ⚠️ Ela **não impede** cair em obstáculo; apenas impede sair do tabuleiro.
 
 ```python
